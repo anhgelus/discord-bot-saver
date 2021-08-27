@@ -46,41 +46,34 @@ client.on("messageCreate", async msg => {
 
         loading_message = await loading_message.edit(`${loading} Sending messages. 0% done.`)
 
-        for ([i, msg_] of messages.entries()) {
+        loop: for ([i, msg_] of messages.entries()) {
             if (!msg_.system) {
                 const files = msg_.attachments.map(a => a)
 
-                while (true) {
-                    let try_count = 0
-                    const max_tries = 5
-                    try {
-                        if (msg_.content) {
-                            await webhook.send({ 
-                                content: msg_.content, 
-                                embeds: msg_.embeds, 
-                                files: files,
-                                components: msg_.components,
-                
-                                username: msg_.author.username,
-                                avatarURL: msg_.author.avatarURL({ dynamic: true })
-                            })
-                        } else {
-                            await webhook.send({
-                                embeds: msg_.embeds, 
-                                files: files,
-                                components: msg_.components,
-                
-                                username: msg_.author.username,
-                                avatarURL: msg_.author.avatarURL({ dynamic: true })
-                            })
-                        }
-                        break
-                    } catch {
-                        try_count++
-                        if (try_count >= max_tries) break
-                    }
-                }
-
+                try {
+					if (msg_.content) {
+						await webhook.send({ 
+							content: msg_.content, 
+							embeds: msg_.embeds, 
+							files: files,
+							components: msg_.components,
+			
+							username: msg_.author.username,
+							avatarURL: msg_.author.avatarURL({ dynamic: true })
+						})
+					} else {
+						await webhook.send({
+							embeds: msg_.embeds, 
+							files: files,
+							components: msg_.components,
+			
+							username: msg_.author.username,
+							avatarURL: msg_.author.avatarURL({ dynamic: true })
+						})
+					}
+				} catch {
+					continue loop
+				}
 
                 const msg_content = `${loading} Sending messages. ${Math.round((i + 1) / msg_count * 100)}% done.`
                 if (loading_message.content !== msg_content) loading_message = await loading_message.edit(msg_content)
